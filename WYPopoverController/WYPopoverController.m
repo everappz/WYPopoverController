@@ -663,7 +663,7 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
 
     UIBezierPath* inRoundedRectPath = [UIBezierPath bezierPathWithRoundedRect:CGRectInset(innerRect, 0.5, 0.5) cornerRadius:cornerRadius];
 
-    if (_borderWidth == 0) {
+    if ((fabs(_borderWidth) < FLT_EPSILON)) {
       inRoundedRectPath = [UIBezierPath bezierPathWithRoundedRect:CGRectInset(innerRect, 0.5, 0.5) byRoundingCorners:UIRectCornerBottomLeft|UIRectCornerBottomRight cornerRadii:CGSizeMake(cornerRadius, cornerRadius)];
     }
 
@@ -866,7 +866,7 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
 - (void)setArrowOffset:(float)value {
   float coef = 1;
 
-  if (value != 0) {
+  if (!(fabs(value) < FLT_EPSILON) ) {
     coef = value / ABS(value);
 
     value = ABS(value);
@@ -948,7 +948,7 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
   result.width += 2 * (_borderWidth + _outerShadowBlurRadius);
   result.height += _borderWidth + 2 * _outerShadowBlurRadius;
 
-  if (_navigationBarHeight == 0) {
+  if ((fabs(_navigationBarHeight) < FLT_EPSILON) ) {
     result.height += _borderWidth;
   }
 
@@ -1346,7 +1346,7 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
   result.size.width -= 2 * _borderWidth;
   result.size.height -= _borderWidth;
 
-  if (_navigationBarHeight == 0 || _wantsDefaultContentAppearance) {
+  if ((fabs(_navigationBarHeight) < FLT_EPSILON) || _wantsDefaultContentAppearance) {
     result.origin.y += _borderWidth;
     result.size.height -= _borderWidth;
   }
