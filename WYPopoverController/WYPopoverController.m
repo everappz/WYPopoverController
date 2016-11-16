@@ -187,17 +187,19 @@ static char const * const UINavigationControllerEmbedInPopoverTagKey = "UINaviga
 @dynamic wy_embedInPopover;
 
 + (void)load {
-  Method original, swizzle;
-
-  original = class_getInstanceMethod(self, @selector(pushViewController:animated:));
-  swizzle = class_getInstanceMethod(self, @selector(sizzled_pushViewController:animated:));
-
-  method_exchangeImplementations(original, swizzle);
-
-  original = class_getInstanceMethod(self, @selector(setViewControllers:animated:));
-  swizzle = class_getInstanceMethod(self, @selector(sizzled_setViewControllers:animated:));
-
-  method_exchangeImplementations(original, swizzle);
+    @autoreleasepool {
+        Method original, swizzle;
+        
+        original = class_getInstanceMethod(self, @selector(pushViewController:animated:));
+        swizzle = class_getInstanceMethod(self, @selector(sizzled_pushViewController:animated:));
+        
+        method_exchangeImplementations(original, swizzle);
+        
+        original = class_getInstanceMethod(self, @selector(setViewControllers:animated:));
+        swizzle = class_getInstanceMethod(self, @selector(sizzled_setViewControllers:animated:));
+        
+        method_exchangeImplementations(original, swizzle);
+    }
 }
 
 - (BOOL)wy_isEmbedInPopover {

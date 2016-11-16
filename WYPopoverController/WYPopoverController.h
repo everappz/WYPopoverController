@@ -128,6 +128,7 @@ typedef NS_OPTIONS(NSUInteger, WYPopoverAnimationOptions) {
 
 - (void)beginThemeUpdates;
 - (void)endThemeUpdates;
+- (void)updateThemeUI;
 
 // Present popover from classic views methods
 
