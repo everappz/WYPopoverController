@@ -850,6 +850,15 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
   return self;
 }
 
+//https://medium.com/@nguyenminhphuc/how-to-pass-ui-events-through-views-in-ios-c1be9ab1626b
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+    UIView *view = [super hitTest:point withEvent:event];
+    if (view == self) {
+        return nil;
+    }
+    return view;
+}
+
 - (void)tapOut {
   [self.delegate popoverBackgroundViewDidTouchOutside:self];
 }
