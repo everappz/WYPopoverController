@@ -614,6 +614,7 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
   if (self) {
     self.backgroundColor = [UIColor clearColor];
     self.userInteractionEnabled = NO;
+    self.isAccessibilityElement = NO;
   }
   return self;
 }
@@ -767,7 +768,7 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
 #pragma mark - UIAccessibility
 
 - (void)accessibilityElementDidBecomeFocused {
-  self.accessibilityLabel = NSLocalizedString(@"Double-tap to dismiss pop-up window.", nil);
+    self.accessibilityLabel = NSLocalizedString(@"Double-tap to dismiss popup window.", @"all");
 }
 
 @end
@@ -845,6 +846,7 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
     self.layer.contentsScale = [UIScreen mainScreen].scale;
     //self.layer.edgeAntialiasingMask = kCALayerLeftEdge | kCALayerRightEdge | kCALayerBottomEdge | kCALayerTopEdge;
     self.layer.delegate = self;
+      
   }
 
   return self;
@@ -915,7 +917,6 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
   _contentView = viewController.view;
 
   _contentView.frame = CGRectIntegral(CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height));
-
   [self addSubview:_contentView];
 
   _navigationBarHeight = 0;
@@ -930,7 +931,7 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
   if (_innerView == nil) {
     _innerView = [[WYPopoverBackgroundInnerView alloc] initWithFrame:_contentView.frame];
     _innerView.userInteractionEnabled = NO;
-
+    _innerView.isAccessibilityElement = NO;
     _innerView.gradientTopColor = self.fillTopColor;
     _innerView.gradientBottomColor = self.fillBottomColor;
     _innerView.innerShadowColor = _innerShadowColor;
