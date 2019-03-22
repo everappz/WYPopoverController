@@ -614,7 +614,6 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
   if (self) {
     self.backgroundColor = [UIColor clearColor];
     self.userInteractionEnabled = NO;
-    self.isAccessibilityElement = NO;
   }
   return self;
 }
@@ -1799,11 +1798,15 @@ static WYPopoverTheme *defaultTheme_ = nil;
     _overlayView = [[WYPopoverOverlayView alloc] initWithFrame:_inView.window.bounds];
     _overlayView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     _overlayView.autoresizesSubviews = NO;
+    _overlayView.isAccessibilityElement = YES;
+    _overlayView.accessibilityTraits = UIAccessibilityTraitNone;
     _overlayView.delegate = self;
     _overlayView.passthroughViews = _passthroughViews;
 
     _backgroundView = [[WYPopoverBackgroundView alloc] initWithContentSize:contentViewSize];
     _backgroundView.appearing = YES;
+    _backgroundView.isAccessibilityElement = YES;
+    _backgroundView.accessibilityTraits = UIAccessibilityTraitNone;
 
     _backgroundView.delegate = self;
     _backgroundView.hidden = YES;
