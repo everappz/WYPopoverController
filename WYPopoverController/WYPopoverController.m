@@ -764,12 +764,6 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
  */
 - (void)drawRect:(CGRect)rect {}
 
-#pragma mark - UIAccessibility
-
-- (void)accessibilityElementDidBecomeFocused {
-    self.accessibilityLabel = NSLocalizedString(@"Double-tap to dismiss popup window.", @"all");
-}
-
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1799,6 +1793,8 @@ static WYPopoverTheme *defaultTheme_ = nil;
     _overlayView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     _overlayView.autoresizesSubviews = NO;
     _overlayView.isAccessibilityElement = YES;
+    _overlayView.accessibilityHint = NSLocalizedString(@"Double-tap to dismiss popup window.", @"all");
+    _overlayView.accessibilityLabel = NSLocalizedString(@"Dismiss popup", @"all");
     _overlayView.accessibilityTraits = UIAccessibilityTraitNone;
     _overlayView.delegate = self;
     _overlayView.passthroughViews = _passthroughViews;
