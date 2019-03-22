@@ -1,5 +1,5 @@
 /*
- Version 0.3.6
+ Version 0.3.9
 
  WYPopoverController is available under the MIT license.
 
@@ -343,7 +343,7 @@ static char const * const UINavigationControllerEmbedInPopoverTagKey = "UINaviga
     if ([self.navigationController wy_isEmbedInPopover] == NO) {
       return;
     } else if ([self respondsToSelector:@selector(setPreferredContentSize:)]) {
-      [self.navigationController sizzled_setPreferredContentSize:aSize];
+      [self.navigationController setPreferredContentSize:aSize];
     }
 #endif
   }
@@ -1539,32 +1539,34 @@ static WYPopoverTheme *defaultTheme_ = nil;
     themeIsUpdating = YES;
 
     WYPopoverBackgroundView *appearance = [WYPopoverBackgroundView appearance];
-    _theme.usesRoundedArrow = appearance.usesRoundedArrow;
-    _theme.dimsBackgroundViewsTintColor = appearance.dimsBackgroundViewsTintColor;
-    _theme.tintColor = appearance.tintColor;
-    _theme.outerStrokeColor = appearance.outerStrokeColor;
-    _theme.innerStrokeColor = appearance.innerStrokeColor;
-    _theme.fillTopColor = appearance.fillTopColor;
-    _theme.fillBottomColor = appearance.fillBottomColor;
-    _theme.glossShadowColor = appearance.glossShadowColor;
-    _theme.glossShadowOffset = appearance.glossShadowOffset;
-    _theme.glossShadowBlurRadius = appearance.glossShadowBlurRadius;
-    _theme.borderWidth = appearance.borderWidth;
-    _theme.arrowBase = appearance.arrowBase;
-    _theme.arrowHeight = appearance.arrowHeight;
-    _theme.outerShadowColor = appearance.outerShadowColor;
-    _theme.outerShadowBlurRadius = appearance.outerShadowBlurRadius;
-    _theme.outerShadowOffset = appearance.outerShadowOffset;
-    _theme.outerCornerRadius = appearance.outerCornerRadius;
-    _theme.minOuterCornerRadius = appearance.minOuterCornerRadius;
-    _theme.innerShadowColor = appearance.innerShadowColor;
-    _theme.innerShadowBlurRadius = appearance.innerShadowBlurRadius;
-    _theme.innerShadowOffset = appearance.innerShadowOffset;
-    _theme.innerCornerRadius = appearance.innerCornerRadius;
-    _theme.viewContentInsets = appearance.viewContentInsets;
-    _theme.overlayColor = appearance.overlayColor;
-    _theme.preferredAlpha = appearance.preferredAlpha;
-
+      
+    WYPopoverTheme* theme = [WYPopoverTheme theme];
+    theme.usesRoundedArrow = appearance.usesRoundedArrow;
+    theme.dimsBackgroundViewsTintColor = appearance.dimsBackgroundViewsTintColor;
+    theme.tintColor = appearance.tintColor;
+    theme.outerStrokeColor = appearance.outerStrokeColor;
+    theme.innerStrokeColor = appearance.innerStrokeColor;
+    theme.fillTopColor = appearance.fillTopColor;
+    theme.fillBottomColor = appearance.fillBottomColor;
+    theme.glossShadowColor = appearance.glossShadowColor;
+    theme.glossShadowOffset = appearance.glossShadowOffset;
+    theme.glossShadowBlurRadius = appearance.glossShadowBlurRadius;
+    theme.borderWidth = appearance.borderWidth;
+    theme.arrowBase = appearance.arrowBase;
+    theme.arrowHeight = appearance.arrowHeight;
+    theme.outerShadowColor = appearance.outerShadowColor;
+    theme.outerShadowBlurRadius = appearance.outerShadowBlurRadius;
+    theme.outerShadowOffset = appearance.outerShadowOffset;
+    theme.outerCornerRadius = appearance.outerCornerRadius;
+    theme.minOuterCornerRadius = appearance.minOuterCornerRadius;
+    theme.innerShadowColor = appearance.innerShadowColor;
+    theme.innerShadowBlurRadius = appearance.innerShadowBlurRadius;
+    theme.innerShadowOffset = appearance.innerShadowOffset;
+    theme.innerCornerRadius = appearance.innerCornerRadius;
+    theme.viewContentInsets = appearance.viewContentInsets;
+    theme.overlayColor = appearance.overlayColor;
+    theme.preferredAlpha = appearance.preferredAlpha;
+    _theme = theme;
 
     themeIsUpdating = NO;
     themeUpdatesEnabled = YES;
@@ -2327,7 +2329,7 @@ static WYPopoverTheme *defaultTheme_ = nil;
   // keyboard support
   if (keyboardHeight > 0) {
 
-    float keyboardY = UIInterfaceOrientationIsPortrait(orientation) ? WYKeyboardListener.rect.origin.y : WYKeyboardListener.rect.origin.x;
+    float keyboardY = overlayHeight - keyboardHeight;
 
     float yOffset = containerFrame.origin.y + containerFrame.size.height - keyboardY;
 

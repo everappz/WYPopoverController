@@ -158,15 +158,15 @@ WYPopoverController uses ARC.
 
 ~~iOS SDK 7.0 (with Xcode 5) is required.~~
 
-#### Cocoapods
+#### CocoaPods
 
-Add this line `pod 'WYPopoverController', '~> 0.3.7'` to your PodFile.
+Add this line `pod 'WYPopoverController', '~> 0.3.9'` to your PodFile.
 
 Your PodFile should look like :
 
 ```Ruby
 platform :ios, '6.0'
-pod 'WYPopoverController', '~> 0.3.7'
+pod 'WYPopoverController', '~> 0.3.9'
 ```
 
 To use the `master` branch of the repo :
