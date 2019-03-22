@@ -930,8 +930,6 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
 
   if (_innerView == nil) {
     _innerView = [[WYPopoverBackgroundInnerView alloc] initWithFrame:_contentView.frame];
-    _innerView.userInteractionEnabled = NO;
-    _innerView.isAccessibilityElement = NO;
     _innerView.gradientTopColor = self.fillTopColor;
     _innerView.gradientBottomColor = self.fillBottomColor;
     _innerView.innerShadowColor = _innerShadowColor;
