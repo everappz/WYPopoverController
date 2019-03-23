@@ -1526,14 +1526,11 @@ static WYPopoverTheme *defaultTheme_ = nil;
     _animationDuration = WY_POPOVER_DEFAULT_ANIMATION_DURATION;
 
     themeUpdatesEnabled = NO;
-
-    [self setTheme:[WYPopoverController defaultTheme]];
-
     themeIsUpdating = YES;
 
     WYPopoverBackgroundView *appearance = [WYPopoverBackgroundView appearance];
       
-    WYPopoverTheme* theme = [WYPopoverTheme theme];
+    WYPopoverTheme *theme = [WYPopoverTheme theme];
     theme.usesRoundedArrow = appearance.usesRoundedArrow;
     theme.dimsBackgroundViewsTintColor = appearance.dimsBackgroundViewsTintColor;
     theme.tintColor = appearance.tintColor;
@@ -1559,7 +1556,10 @@ static WYPopoverTheme *defaultTheme_ = nil;
     theme.viewContentInsets = appearance.viewContentInsets;
     theme.overlayColor = appearance.overlayColor;
     theme.preferredAlpha = appearance.preferredAlpha;
+    
     _theme = theme;
+      
+    [self registerTheme];
 
     themeIsUpdating = NO;
     themeUpdatesEnabled = YES;
@@ -2443,8 +2443,8 @@ static WYPopoverTheme *defaultTheme_ = nil;
       [strongSelf->_delegate popoverControllerDidDismissPopover:strongSelf];
     }
 
-    if (self.dismissCompletionBlock) {
-      self.dismissCompletionBlock(strongSelf);
+    if (strongSelf.dismissCompletionBlock) {
+      strongSelf.dismissCompletionBlock(strongSelf);
     }
   };
 
