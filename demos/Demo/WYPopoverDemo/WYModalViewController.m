@@ -61,7 +61,7 @@
         
         UINavigationController* contentViewController = [[UINavigationController alloc] initWithRootViewController:settingsViewController];
         
-        settingsPopoverController = [[WYPopoverController alloc] initWithContentViewController:contentViewController];
+        settingsPopoverController = [[WYPopoverController alloc] initWithContentViewController:contentViewController window:self.view.window];
         settingsPopoverController.delegate = self;
         settingsPopoverController.passthroughViews = @[btn];
         settingsPopoverController.popoverLayoutMargins = UIEdgeInsetsMake(10, 10, 10, 10);

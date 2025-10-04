@@ -30,11 +30,11 @@
 
 @interface WYStoryboardPopoverSegue()
 {
-  WYPopoverController *_popoverController;
-  id _sender;
-  WYPopoverArrowDirection _arrowDirections;
-  WYPopoverAnimationOptions _options;
-  BOOL _animated;
+    WYPopoverController *_popoverController;
+    id _sender;
+    WYPopoverArrowDirection _arrowDirections;
+    WYPopoverAnimationOptions _options;
+    BOOL _animated;
 }
 
 @end
@@ -45,32 +45,32 @@
 
 - (void)perform
 {
-  if ([_sender isKindOfClass:[UIBarButtonItem class]])
-  {
-    [_popoverController presentPopoverFromBarButtonItem:(UIBarButtonItem*)_sender
-                               permittedArrowDirections:_arrowDirections
-                                               animated:_animated
-                                                options:_options];
-  }
-  else
-  {
-    UIView *view = (UIView *)_sender;
-    [_popoverController presentPopoverFromRect:view.bounds
-                                        inView:view
-                      permittedArrowDirections:_arrowDirections
-                                      animated:_animated
-                                       options:_options];
-  }
+    if ([_sender isKindOfClass:[UIBarButtonItem class]])
+    {
+        [_popoverController presentPopoverFromBarButtonItem:(UIBarButtonItem*)_sender
+                                   permittedArrowDirections:_arrowDirections
+                                                   animated:_animated
+                                                    options:_options];
+    }
+    else
+    {
+        UIView *view = (UIView *)_sender;
+        [_popoverController presentPopoverFromRect:view.bounds
+                                            inView:view
+                          permittedArrowDirections:_arrowDirections
+                                          animated:_animated
+                                           options:_options];
+    }
 }
 
 - (WYPopoverController *)popoverControllerWithSender:(id)aSender
                             permittedArrowDirections:(WYPopoverArrowDirection)aArrowDirections
                                             animated:(BOOL)aAnimated
 {
-  return [self popoverControllerWithSender:aSender
-                  permittedArrowDirections:aArrowDirections
-                                  animated:aAnimated
-                                   options:WYPopoverAnimationOptionFade];
+    return [self popoverControllerWithSender:aSender
+                    permittedArrowDirections:aArrowDirections
+                                    animated:aAnimated
+                                     options:WYPopoverAnimationOptionFade];
 }
 
 - (WYPopoverController *)popoverControllerWithSender:(id)aSender
@@ -78,20 +78,20 @@
                                             animated:(BOOL)aAnimated
                                              options:(WYPopoverAnimationOptions)aOptions
 {
-  _sender = aSender;
-  _arrowDirections = aArrowDirections;
-  _animated = aAnimated;
-  _options = aOptions;
-  
-  _popoverController = [[WYPopoverController alloc] initWithContentViewController:self.destinationViewController];
-  
-  return _popoverController;
+    _sender = aSender;
+    _arrowDirections = aArrowDirections;
+    _animated = aAnimated;
+    _options = aOptions;
+    
+    _popoverController = [[WYPopoverController alloc] initWithContentViewController:self.destinationViewController window:self.sourceViewController.view.window];
+    
+    return _popoverController;
 }
 
 - (void)dealloc
 {
-  _sender = nil;
-  _popoverController = nil;
+    _sender = nil;
+    _popoverController = nil;
 }
 
 @end

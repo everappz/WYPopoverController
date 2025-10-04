@@ -112,6 +112,7 @@ typedef NS_OPTIONS(NSUInteger, WYPopoverAnimationOptions) {
 @property (nonatomic, assign) CGSize                            popoverContentSize;
 @property (nonatomic, assign) float                             animationDuration;
 @property (nonatomic, assign) BOOL                              implicitAnimationsDisabled;
+@property (nonatomic, strong, readonly) UIWindow                *window;
 
 @property (nonatomic, strong) WYPopoverTheme                   *theme;
 
@@ -122,7 +123,7 @@ typedef NS_OPTIONS(NSUInteger, WYPopoverAnimationOptions) {
 
 // initialization
 
-- (id)initWithContentViewController:(UIViewController *)viewController;
+- (id)initWithContentViewController:(UIViewController *)viewController window:(UIWindow *)window;
 
 // theme
 
