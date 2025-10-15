@@ -911,7 +911,7 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
     
     _contentView.frame = CGRectIntegral(CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height));
     [self addSubview:_contentView];
-    
+
     _navigationBarHeight = 0;
     
     if ([viewController isKindOfClass:[UINavigationController class]]) {
@@ -1703,7 +1703,9 @@ static WYPopoverTheme *defaultTheme_ = nil;
         NSCParameterAssert(_window);
         CGSize windowSize = _window.bounds.size;
         
-        UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+        NSCParameterAssert(_window);
+        UIInterfaceOrientation orientation = _window.windowScene.interfaceOrientation;
+        NSCParameterAssert(orientation != UIInterfaceOrientationUnknown);
         
         result = CGSizeMake(UIInterfaceOrientationIsPortrait(orientation) ? windowSize.width : windowSize.height, UIInterfaceOrientationIsLandscape(orientation) ? windowSize.width : windowSize.height);
     }
@@ -1840,8 +1842,8 @@ static WYPopoverTheme *defaultTheme_ = nil;
         __typeof__(self) strongSelf = weakSelf;
         
         if (strongSelf) {
-            if (_isObserverAdded == NO) {
-                _isObserverAdded = YES;
+            if (strongSelf->_isObserverAdded == NO) {
+                strongSelf->_isObserverAdded = YES;
                 
                 if ([strongSelf->_viewController respondsToSelector:@selector(preferredContentSize)]) {
                     [strongSelf->_viewController addObserver:self forKeyPath:NSStringFromSelector(@selector(preferredContentSize)) options:0 context:nil];
@@ -1859,11 +1861,12 @@ static WYPopoverTheme *defaultTheme_ = nil;
         }
     };
     
-    void (^adjustTintDimmed)() = ^() {
+    void (^adjustTintDimmed)(void) = ^{
+        __typeof__(self) strongSelf = weakSelf;
 #ifdef WY_BASE_SDK_7_ENABLED
-        if (_backgroundView.dimsBackgroundViewsTintColor && [_inView.window respondsToSelector:@selector(setTintAdjustmentMode:)]) {
-            for (UIView *subview in _inView.window.subviews) {
-                if (subview != _backgroundView) {
+        if (strongSelf->_backgroundView.dimsBackgroundViewsTintColor && [strongSelf->_inView.window respondsToSelector:@selector(setTintAdjustmentMode:)]) {
+            for (UIView *subview in strongSelf->_inView.window.subviews) {
+                if (subview != strongSelf->_backgroundView) {
                     [subview setTintAdjustmentMode:UIViewTintAdjustmentModeDimmed];
                 }
             }
@@ -2007,7 +2010,9 @@ static WYPopoverTheme *defaultTheme_ = nil;
 - (CGAffineTransform)transformForArrowDirection:(WYPopoverArrowDirection)arrowDirection {
     CGAffineTransform transform = _backgroundView.transform;
     
-    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+    NSCParameterAssert(_window);
+    UIInterfaceOrientation orientation = _window.windowScene.interfaceOrientation;
+    NSCParameterAssert(orientation != UIInterfaceOrientationUnknown);
     
     CGSize containerViewSize = _backgroundView.frame.size;
     
@@ -2069,7 +2074,11 @@ static WYPopoverTheme *defaultTheme_ = nil;
 
 - (void)positionPopover:(BOOL)aAnimated {
     CGRect savedContainerFrame = _backgroundView.frame;
-    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
+    NSCParameterAssert(_window);
+    UIInterfaceOrientation orientation = _window.windowScene.interfaceOrientation;
+    NSCParameterAssert(orientation != UIInterfaceOrientationUnknown);
+    
     CGSize contentViewSize = self.popoverContentSize;
     CGSize minContainerSize = WY_POPOVER_MIN_SIZE;
     
@@ -2115,7 +2124,7 @@ static WYPopoverTheme *defaultTheme_ = nil;
     
     minX = _popoverLayoutMargins.left;
     maxX = overlayWidth - _popoverLayoutMargins.right;
-    minY = WYStatusBarHeight() + _popoverLayoutMargins.top;
+    minY = WYStatusBarHeight(_window) + _popoverLayoutMargins.top;
     maxY = overlayHeight - _popoverLayoutMargins.bottom - keyboardHeight;
     
     // Which direction ?
@@ -2419,11 +2428,12 @@ static WYPopoverTheme *defaultTheme_ = nil;
     __weak __typeof__(self) weakSelf = self;
     
     
-    void (^adjustTintAutomatic)() = ^() {
+    void (^adjustTintAutomatic)(void) = ^ {
+        __typeof__(self) strongSelf = weakSelf;
 #ifdef WY_BASE_SDK_7_ENABLED
-        if ([_inView.window respondsToSelector:@selector(setTintAdjustmentMode:)]) {
-            for (UIView *subview in _inView.window.subviews) {
-                if (subview != _backgroundView) {
+        if ([strongSelf->_inView.window respondsToSelector:@selector(setTintAdjustmentMode:)]) {
+            for (UIView *subview in strongSelf->_inView.window.subviews) {
+                if (subview != strongSelf->_backgroundView) {
                     [subview setTintAdjustmentMode:UIViewTintAdjustmentModeAutomatic];
                 }
             }
@@ -2431,7 +2441,7 @@ static WYPopoverTheme *defaultTheme_ = nil;
 #endif
     };
     
-    void (^completionBlock)() = ^() {
+    void (^completionBlock)(void) = ^{
         __typeof__(self) strongSelf = weakSelf;
         
         if (strongSelf) {
@@ -2533,7 +2543,7 @@ static WYPopoverTheme *defaultTheme_ = nil;
 #pragma mark WYPopoverOverlayViewDelegate
 
 - (void)popoverOverlayViewDidTouch:(WYPopoverOverlayView *)aOverlayView {
-    BOOL shouldDismiss = !_viewController.modalInPopover;
+    BOOL shouldDismiss = !_viewController.isModalInPresentation;
     
     if (shouldDismiss && _delegate && [_delegate respondsToSelector:@selector(popoverControllerShouldDismissPopover:)]) {
         shouldDismiss = [_delegate popoverControllerShouldDismissPopover:self];
@@ -2658,7 +2668,10 @@ static WYPopoverTheme *defaultTheme_ = nil;
                inView:(UIView *)aView
           arrowHeight:(float)arrowHeight
        arrowDirection:(WYPopoverArrowDirection)arrowDirection {
-    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
+    NSCParameterAssert(_window);
+    UIInterfaceOrientation orientation = _window.windowScene.interfaceOrientation;
+    NSCParameterAssert(orientation != UIInterfaceOrientationUnknown);
     
     CGRect viewFrame = [aView convertRect:aRect toView:nil];
     viewFrame = WYRectInWindowBounds(viewFrame, orientation, _window);
@@ -2685,7 +2698,7 @@ static WYPopoverTheme *defaultTheme_ = nil;
     
     minX = _popoverLayoutMargins.left;
     maxX = overlayWidth - _popoverLayoutMargins.right;
-    minY = WYStatusBarHeight() + _popoverLayoutMargins.top;
+    minY = WYStatusBarHeight(_window) + _popoverLayoutMargins.top;
     maxY = overlayHeight - _popoverLayoutMargins.bottom - keyboardHeight;
     
     CGSize result = CGSizeZero;
@@ -2748,14 +2761,16 @@ __unused static NSString* WYStringFromOrientation(NSInteger orientation) {
     return result;
 }
 
-static float WYStatusBarHeight() {
+static float WYStatusBarHeight(UIWindow *window) {
     if (compileUsingIOS8SDK() && [[NSProcessInfo processInfo] respondsToSelector:@selector(operatingSystemVersion)]) {
-        CGRect statusBarFrame = [[UIApplication sharedApplication] statusBarFrame];
+        CGRect statusBarFrame = window.windowScene.statusBarManager.statusBarFrame;
         return statusBarFrame.size.height;
     } else {
-        UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+        NSCParameterAssert(window);
+        UIInterfaceOrientation orientation = window.windowScene.interfaceOrientation;
+        NSCParameterAssert(orientation != UIInterfaceOrientationUnknown);
         float statusBarHeight = 0;
-        CGRect statusBarFrame = [[UIApplication sharedApplication] statusBarFrame];
+        CGRect statusBarFrame = window.windowScene.statusBarManager.statusBarFrame;
         statusBarHeight = statusBarFrame.size.height;
         
         if (UIInterfaceOrientationIsLandscape(orientation))
@@ -2899,10 +2914,6 @@ static CGPoint WYPointRelativeToOrientation(CGPoint origin, CGSize size, UIInter
 }
 
 - (void)keyboardWillShow:(NSNotification *)notification {
-    //UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
-    //WY_LOG(@"orientation = %@", WYStringFromOrientation(orientation));
-    //WY_LOG(@"WYKeyboardListener.rect = %@", NSStringFromCGRect(WYKeyboardListener.rect));
-    
     BOOL shouldIgnore = NO;
     
     if (_delegate && [_delegate respondsToSelector:@selector(popoverControllerShouldIgnoreKeyboardBounds:)]) {
