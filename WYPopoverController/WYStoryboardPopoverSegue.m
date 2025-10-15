@@ -45,21 +45,21 @@
 
 - (void)perform
 {
-    if ([_sender isKindOfClass:[UIBarButtonItem class]])
-    {
+    if ([_sender isKindOfClass:[UIBarButtonItem class]]) {
         [_popoverController presentPopoverFromBarButtonItem:(UIBarButtonItem*)_sender
                                    permittedArrowDirections:_arrowDirections
                                                    animated:_animated
-                                                    options:_options];
+                                                    options:_options
+                                                completion:nil];
     }
-    else
-    {
+    else {
         UIView *view = (UIView *)_sender;
         [_popoverController presentPopoverFromRect:view.bounds
                                             inView:view
                           permittedArrowDirections:_arrowDirections
                                           animated:_animated
-                                           options:_options];
+                                           options:_options
+                                        completion:nil];
     }
 }
 
@@ -83,7 +83,9 @@
     _animated = aAnimated;
     _options = aOptions;
     
-    _popoverController = [[WYPopoverController alloc] initWithContentViewController:self.destinationViewController window:self.sourceViewController.view.window];
+    _popoverController = [[WYPopoverController alloc] initWithContentViewController:self.destinationViewController
+                                                               presentingController:self.sourceViewController
+                                                                             window:self.sourceViewController.view.window];
     
     return _popoverController;
 }

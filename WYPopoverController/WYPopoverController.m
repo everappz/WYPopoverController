@@ -447,7 +447,6 @@ static char const * const UINavigationControllerEmbedInPopoverTagKey = "UINaviga
     result.overlayColor = [UIColor clearColor];
     result.preferredAlpha = 1.0f;
     
-    
     return result;
 }
 
@@ -480,7 +479,6 @@ static char const * const UINavigationControllerEmbedInPopoverTagKey = "UINaviga
     result.viewContentInsets = UIEdgeInsetsZero;
     result.overlayColor = [UIColor colorWithWhite:0 alpha:0.15];
     result.preferredAlpha = 1.0f;
-    
     
     return result;
 }
@@ -907,7 +905,18 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
 }
 
 - (void)setViewController:(UIViewController *)viewController {
-    _contentView = viewController.view;
+    
+    if (_contentView == nil) {
+        _contentView = [[UIView alloc] init];
+        _contentView.layer.masksToBounds = YES;
+        _contentView.layer.cornerRadius = _outerCornerRadius;
+    }
+    
+    [_contentView.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
+
+    [_contentView addSubview:viewController.view];
+    viewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    [viewController.view setFrame:_contentView.bounds];
     
     _contentView.frame = CGRectIntegral(CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height));
     [self addSubview:_contentView];
@@ -1423,6 +1432,7 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
 
 @interface WYPopoverController () <WYPopoverOverlayViewDelegate, WYPopoverBackgroundViewDelegate> {
     UIViewController        *_viewController;
+    __weak UIViewController *_presentingController;
     CGRect                   _rect;
     UIView                  *_inView;
     WYPopoverOverlayView    *_overlayView;
@@ -1435,7 +1445,7 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
     BOOL                     _ignoreOrientation;
     __weak UIBarButtonItem  *_barButtonItem;
     
-    WYPopoverAnimationOptions options;
+    WYPopoverAnimationOptions _options;
     
     BOOL themeUpdatesEnabled;
     BOOL themeIsUpdating;
@@ -1577,10 +1587,15 @@ static WYPopoverTheme *defaultTheme_ = nil;
     return self;
 }
 
-- (id)initWithContentViewController:(UIViewController *)aViewController window:(UIWindow *)window {
+
+- (id)initWithContentViewController:(UIViewController *)aViewController
+               presentingController:(UIViewController *)presentingViewController
+                             window:(UIWindow *)window
+{
     self = [self init];
     
     if (self) {
+        _presentingController = presentingViewController;
         _viewController = aViewController;
         _window = window;
     }
@@ -1742,43 +1757,6 @@ static WYPopoverTheme *defaultTheme_ = nil;
 - (void)presentPopoverFromRect:(CGRect)aRect
                         inView:(UIView *)aView
       permittedArrowDirections:(WYPopoverArrowDirection)aArrowDirections
-                      animated:(BOOL)aAnimated {
-    [self presentPopoverFromRect:aRect
-                          inView:aView
-        permittedArrowDirections:aArrowDirections
-                        animated:aAnimated
-                      completion:nil];
-}
-
-- (void)presentPopoverFromRect:(CGRect)aRect
-                        inView:(UIView *)aView
-      permittedArrowDirections:(WYPopoverArrowDirection)aArrowDirections
-                      animated:(BOOL)aAnimated
-                    completion:(void (^)(void))completion {
-    [self presentPopoverFromRect:aRect
-                          inView:aView
-        permittedArrowDirections:aArrowDirections
-                        animated:aAnimated
-                         options:WYPopoverAnimationOptionFade
-                      completion:completion];
-}
-
-- (void)presentPopoverFromRect:(CGRect)aRect
-                        inView:(UIView *)aView
-      permittedArrowDirections:(WYPopoverArrowDirection)aArrowDirections
-                      animated:(BOOL)aAnimated
-                       options:(WYPopoverAnimationOptions)aOptions {
-    [self presentPopoverFromRect:aRect
-                          inView:aView
-        permittedArrowDirections:aArrowDirections
-                        animated:aAnimated
-                         options:aOptions
-                      completion:nil];
-}
-
-- (void)presentPopoverFromRect:(CGRect)aRect
-                        inView:(UIView *)aView
-      permittedArrowDirections:(WYPopoverArrowDirection)aArrowDirections
                       animated:(BOOL)aAnimated
                        options:(WYPopoverAnimationOptions)aOptions
                     completion:(void (^)(void))completion {
@@ -1788,7 +1766,7 @@ static WYPopoverTheme *defaultTheme_ = nil;
     _inView = aView;
     _permittedArrowDirections = aArrowDirections;
     _animated = aAnimated;
-    options = aOptions;
+    _options = aOptions;
     
     if (!_inView) {
         NSCParameterAssert(_window);
@@ -1801,7 +1779,7 @@ static WYPopoverTheme *defaultTheme_ = nil;
     CGSize contentViewSize = self.popoverContentSize;
     
     if (_overlayView == nil) {
-        _overlayView = [[WYPopoverOverlayView alloc] initWithFrame:_inView.window.bounds];
+        _overlayView = [[WYPopoverOverlayView alloc] initWithFrame:_window.bounds];
         _overlayView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         _overlayView.autoresizesSubviews = NO;
         _overlayView.isAccessibilityElement = YES;
@@ -1856,8 +1834,10 @@ static WYPopoverTheme *defaultTheme_ = nil;
         
         if (completion) {
             completion();
-        } else if (strongSelf && strongSelf->_delegate && [strongSelf->_delegate respondsToSelector:@selector(popoverControllerDidPresentPopover:)]) {
-            [strongSelf->_delegate popoverControllerDidPresentPopover:strongSelf];
+        }
+        
+        if ([strongSelf->_delegate respondsToSelector:@selector(popoverControllerDidPresentPopover:)]) {
+            [strongSelf->_delegate popoverControllerDidPresentPopover:weakSelf];
         }
     };
     
@@ -1877,14 +1857,14 @@ static WYPopoverTheme *defaultTheme_ = nil;
     _backgroundView.hidden = NO;
     
     if (_animated) {
-        if ((options & WYPopoverAnimationOptionFade) == WYPopoverAnimationOptionFade) {
+        if ((_options & WYPopoverAnimationOptionFade) == WYPopoverAnimationOptionFade) {
             _overlayView.alpha = 0;
             _backgroundView.alpha = 0;
         }
         
         CGAffineTransform endTransform = _backgroundView.transform;
         
-        if ((options & WYPopoverAnimationOptionScale) == WYPopoverAnimationOptionScale) {
+        if ((_options & WYPopoverAnimationOptionScale) == WYPopoverAnimationOptionScale) {
             CGAffineTransform startTransform = [self transformForArrowDirection:_backgroundView.arrowDirection];
             _backgroundView.transform = startTransform;
         }
@@ -1932,37 +1912,6 @@ static WYPopoverTheme *defaultTheme_ = nil;
 
 - (void)presentPopoverFromBarButtonItem:(UIBarButtonItem *)aItem
                permittedArrowDirections:(WYPopoverArrowDirection)aArrowDirections
-                               animated:(BOOL)aAnimated {
-    [self presentPopoverFromBarButtonItem:aItem
-                 permittedArrowDirections:aArrowDirections
-                                 animated:aAnimated
-                               completion:nil];
-}
-
-- (void)presentPopoverFromBarButtonItem:(UIBarButtonItem *)aItem
-               permittedArrowDirections:(WYPopoverArrowDirection)aArrowDirections
-                               animated:(BOOL)aAnimated
-                             completion:(void (^)(void))completion {
-    [self presentPopoverFromBarButtonItem:aItem
-                 permittedArrowDirections:aArrowDirections
-                                 animated:aAnimated
-                                  options:WYPopoverAnimationOptionFade
-                               completion:completion];
-}
-
-- (void)presentPopoverFromBarButtonItem:(UIBarButtonItem *)aItem
-               permittedArrowDirections:(WYPopoverArrowDirection)aArrowDirections
-                               animated:(BOOL)aAnimated
-                                options:(WYPopoverAnimationOptions)aOptions {
-    [self presentPopoverFromBarButtonItem:aItem
-                 permittedArrowDirections:aArrowDirections
-                                 animated:aAnimated
-                                  options:aOptions
-                               completion:nil];
-}
-
-- (void)presentPopoverFromBarButtonItem:(UIBarButtonItem *)aItem
-               permittedArrowDirections:(WYPopoverArrowDirection)aArrowDirections
                                animated:(BOOL)aAnimated
                                 options:(WYPopoverAnimationOptions)aOptions
                              completion:(void (^)(void))completion {
@@ -1975,25 +1924,6 @@ static WYPopoverTheme *defaultTheme_ = nil;
                         animated:aAnimated
                          options:aOptions
                       completion:completion];
-}
-
-- (void)presentPopoverAsDialogAnimated:(BOOL)aAnimated {
-    [self presentPopoverAsDialogAnimated:aAnimated
-                              completion:nil];
-}
-
-- (void)presentPopoverAsDialogAnimated:(BOOL)aAnimated
-                            completion:(void (^)(void))completion {
-    [self presentPopoverAsDialogAnimated:aAnimated
-                                 options:WYPopoverAnimationOptionFade
-                              completion:completion];
-}
-
-- (void)presentPopoverAsDialogAnimated:(BOOL)aAnimated
-                               options:(WYPopoverAnimationOptions)aOptions {
-    [self presentPopoverAsDialogAnimated:aAnimated
-                                 options:aOptions
-                              completion:nil];
 }
 
 - (void)presentPopoverAsDialogAnimated:(BOOL)aAnimated
@@ -2342,7 +2272,14 @@ static WYPopoverTheme *defaultTheme_ = nil;
     
     _backgroundView.wantsDefaultContentAppearance = _wantsDefaultContentAppearance;
     
+    [_viewController willMoveToParentViewController:nil];
+    [_viewController.view removeFromSuperview];
+    [_viewController removeFromParentViewController];
+    
     [_backgroundView setViewController:_viewController];
+    
+    [_presentingController addChildViewController:_viewController];
+    [_viewController didMoveToParentViewController:_presentingController];
     
     // keyboard support
     if (keyboardHeight > 0) {
@@ -2389,39 +2326,10 @@ static WYPopoverTheme *defaultTheme_ = nil;
     //  WY_LOG(@"popoverContainerView.frame = %@", NSStringFromCGRect(_backgroundView.frame));
 }
 
-- (void)dismissPopoverAnimated:(BOOL)aAnimated {
-    [self dismissPopoverAnimated:aAnimated
-                         options:options
-                      completion:nil];
-}
-
-- (void)dismissPopoverAnimated:(BOOL)aAnimated
-                    completion:(void (^)(void))completion {
-    [self dismissPopoverAnimated:aAnimated
-                         options:options
-                      completion:completion];
-}
-
-- (void)dismissPopoverAnimated:(BOOL)aAnimated
-                       options:(WYPopoverAnimationOptions)aOptions {
-    [self dismissPopoverAnimated:aAnimated
-                         options:aOptions
-                      completion:nil];
-}
-
-- (void)dismissPopoverAnimated:(BOOL)aAnimated
-                       options:(WYPopoverAnimationOptions)aOptions
-                    completion:(void (^)(void))completion {
-    [self dismissPopoverAnimated:aAnimated
-                         options:aOptions
-                      completion:completion
-                    callDelegate:NO];
-}
-
 - (void)dismissPopoverAnimated:(BOOL)aAnimated
                        options:(WYPopoverAnimationOptions)aOptions
                     completion:(void (^)(void))completion
-                  callDelegate:(BOOL)callDelegate {
+{
     float duration = self.animationDuration;
     WYPopoverAnimationOptions style = aOptions;
     
@@ -2446,7 +2354,6 @@ static WYPopoverTheme *defaultTheme_ = nil;
         
         if (strongSelf) {
             [strongSelf->_backgroundView removeFromSuperview];
-            
             strongSelf->_backgroundView = nil;
             
             [strongSelf->_overlayView removeFromSuperview];
@@ -2454,17 +2361,22 @@ static WYPopoverTheme *defaultTheme_ = nil;
             
             // inView is captured strongly in presentPopoverInRect:... method, so it needs to be released in dismiss method to avoid potential retain cycles
             strongSelf->_inView = nil;
+            
+            [strongSelf->_viewController willMoveToParentViewController:nil];
+            [strongSelf->_viewController.view removeFromSuperview];
+            [strongSelf->_viewController removeFromParentViewController];
         }
         
         if (completion) {
             completion();
         }
-        else if (callDelegate && strongSelf && strongSelf->_delegate && [strongSelf->_delegate respondsToSelector:@selector(popoverControllerDidDismissPopover:)]) {
-            [strongSelf->_delegate popoverControllerDidDismissPopover:strongSelf];
+        
+        if ([strongSelf->_delegate respondsToSelector:@selector(popoverControllerDidDismissPopover:)]) {
+            [strongSelf->_delegate popoverControllerDidDismissPopover:weakSelf];
         }
         
-        if (strongSelf.dismissCompletionBlock) {
-            strongSelf.dismissCompletionBlock(strongSelf);
+        if (strongSelf->_dismissCompletionBlock) {
+            strongSelf->_dismissCompletionBlock(weakSelf);
         }
     };
     
@@ -2550,7 +2462,7 @@ static WYPopoverTheme *defaultTheme_ = nil;
     }
     
     if (shouldDismiss) {
-        [self dismissPopoverAnimated:_animated options:options completion:nil callDelegate:YES];
+        [self dismissPopoverAnimated:_animated options:_options completion:nil];
     }
 }
 
@@ -2561,6 +2473,7 @@ static WYPopoverTheme *defaultTheme_ = nil;
 }
 
 #pragma mark Private
+
 - (WYPopoverArrowDirection)arrowDirectionForRect:(CGRect)aRect
                                           inView:(UIView *)aView
                                      contentSize:(CGSize)contentSize
@@ -2947,6 +2860,14 @@ static CGPoint WYPointRelativeToOrientation(CGPoint origin, CGSize size, UIInter
     
     [_overlayView removeFromSuperview];
     [_overlayView setDelegate:nil];
+    
+    const BOOL shouldRemoveViewController = _viewController.parentViewController == _presentingController;
+    if (shouldRemoveViewController) {
+        [_viewController willMoveToParentViewController:nil];
+        [_viewController.view removeFromSuperview];
+        [_viewController removeFromParentViewController];
+    }
+    
     @try {
         if (_isObserverAdded == YES) {
             _isObserverAdded = NO;
@@ -2958,8 +2879,7 @@ static CGPoint WYPointRelativeToOrientation(CGPoint origin, CGSize size, UIInter
             }
         }
     }
-    @catch (NSException *exception) {
-    }
+    @catch (NSException *exception) {}
     @finally {
         _viewController = nil;
     }

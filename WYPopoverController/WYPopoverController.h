@@ -123,7 +123,9 @@ typedef NS_OPTIONS(NSUInteger, WYPopoverAnimationOptions) {
 
 // initialization
 
-- (id)initWithContentViewController:(UIViewController *)viewController window:(UIWindow *)window;
+- (id)initWithContentViewController:(UIViewController *)viewController
+               presentingController:(UIViewController *)presentingViewController
+                             window:(UIWindow *)window;
 
 // theme
 
@@ -136,42 +138,11 @@ typedef NS_OPTIONS(NSUInteger, WYPopoverAnimationOptions) {
 - (void)presentPopoverFromRect:(CGRect)rect
                         inView:(UIView *)view
       permittedArrowDirections:(WYPopoverArrowDirection)arrowDirections
-                      animated:(BOOL)animated;
-
-- (void)presentPopoverFromRect:(CGRect)rect
-                        inView:(UIView *)view
-      permittedArrowDirections:(WYPopoverArrowDirection)arrowDirections
-                      animated:(BOOL)animated
-                    completion:(void (^)(void))completion;
-
-- (void)presentPopoverFromRect:(CGRect)rect
-                        inView:(UIView *)view
-      permittedArrowDirections:(WYPopoverArrowDirection)arrowDirections
-                      animated:(BOOL)animated
-                       options:(WYPopoverAnimationOptions)options;
-
-- (void)presentPopoverFromRect:(CGRect)rect
-                        inView:(UIView *)view
-      permittedArrowDirections:(WYPopoverArrowDirection)arrowDirections
                       animated:(BOOL)animated
                        options:(WYPopoverAnimationOptions)options
                     completion:(void (^)(void))completion;
 
 // Present popover from bar button items methods
-
-- (void)presentPopoverFromBarButtonItem:(UIBarButtonItem *)item
-               permittedArrowDirections:(WYPopoverArrowDirection)arrowDirections
-                               animated:(BOOL)animated;
-
-- (void)presentPopoverFromBarButtonItem:(UIBarButtonItem *)item
-               permittedArrowDirections:(WYPopoverArrowDirection)arrowDirections
-                               animated:(BOOL)animated
-                             completion:(void (^)(void))completion;
-
-- (void)presentPopoverFromBarButtonItem:(UIBarButtonItem *)item
-               permittedArrowDirections:(WYPopoverArrowDirection)arrowDirections
-                               animated:(BOOL)animated
-                                options:(WYPopoverAnimationOptions)options;
 
 - (void)presentPopoverFromBarButtonItem:(UIBarButtonItem *)item
                permittedArrowDirections:(WYPopoverArrowDirection)arrowDirections
@@ -181,27 +152,11 @@ typedef NS_OPTIONS(NSUInteger, WYPopoverAnimationOptions) {
 
 // Present popover as dialog methods
 
-- (void)presentPopoverAsDialogAnimated:(BOOL)animated;
-
-- (void)presentPopoverAsDialogAnimated:(BOOL)animated
-                            completion:(void (^)(void))completion;
-
-- (void)presentPopoverAsDialogAnimated:(BOOL)animated
-                               options:(WYPopoverAnimationOptions)options;
-
 - (void)presentPopoverAsDialogAnimated:(BOOL)animated
                                options:(WYPopoverAnimationOptions)options
                             completion:(void (^)(void))completion;
 
 // Dismiss popover methods
-
-- (void)dismissPopoverAnimated:(BOOL)animated;
-
-- (void)dismissPopoverAnimated:(BOOL)animated
-                    completion:(void (^)(void))completion;
-
-- (void)dismissPopoverAnimated:(BOOL)animated
-                       options:(WYPopoverAnimationOptions)aOptions;
 
 - (void)dismissPopoverAnimated:(BOOL)animated
                        options:(WYPopoverAnimationOptions)aOptions
@@ -210,6 +165,7 @@ typedef NS_OPTIONS(NSUInteger, WYPopoverAnimationOptions) {
 // Misc
 
 - (void)setPopoverContentSize:(CGSize)size animated:(BOOL)animated;
+
 - (void)performWithoutAnimation:(void (^)(void))aBlock;
 
 @end
